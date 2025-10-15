@@ -1,5 +1,4 @@
 <!doctype html>
-
 <html lang="en">
 
 <head>
@@ -24,9 +23,12 @@
       color: #6c757d;
     }
 
-    /* Make table horizontally scrollable on small screens */
     .table-responsive-sm {
       overflow-x: auto;
+    }
+
+    #pcrChart {
+      max-height: 400px;
     }
   </style>
 </head>
@@ -46,6 +48,7 @@
       </div>
     </div>
   </nav>
+
   <div class="container my-4">
     <div class="row g-3">
       <div class="col-12 col-lg-8">
@@ -64,7 +67,7 @@
 
           <div class="row g-3">
             <div class="col-12">
-              <canvas id="pcrChart" width="600" height="300"></canvas>
+              <canvas id="pcrChart"></canvas>
             </div>
 
             <div class="col-12 d-flex gap-2 flex-wrap">
@@ -104,7 +107,6 @@
             </table>
           </div>
         </div>
-
       </div>
 
       <div class="col-12 col-lg-4">
@@ -134,13 +136,14 @@
             points to mimic PCR behavior and is not real market data.</p>
         </div>
       </div>
-
     </div>
+
     <footer class="mt-4 text-center small-muted">Recreated page • Bootstrap 5 • Chart.js • Responsive layout</footer>
-  </div><!-- Bootstrap Bundle -->
+  </div>
+
+  <!-- Bootstrap Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Generate 50 dummy dates and PCR values
     function generateDummyData(n = 50) {
       const labels = [];
       const pcr = [];
@@ -151,7 +154,6 @@
         const d = new Date(today);
         d.setDate(today.getDate() - i);
         labels.push(d.toISOString().split('T')[0]);
-        // generate calls and puts to create a realistic PCR
         const call = Math.round(800000 + Math.random() * 200000 * (1 + Math.sin(i / 6)));
         const put = Math.round(call * (0.7 + Math.random() * 0.6));
         calls.push(call);
@@ -165,7 +167,6 @@
     let currentCount = 50;
     let chartType = 'line';
 
-    // Create chart
     const ctx = document.getElementById('pcrChart').getContext('2d');
     let pcrChart = new Chart(ctx, {
       type: chartType,
@@ -223,19 +224,20 @@
       const pcr = fullData.pcr.slice(-count);
       for (let i = 0; i < labels.length; i++) {
         const tr = document.createElement('tr');
-        tr.innerHTML = <td>${i+1}</td><td>${labels[i]}</td><td>—</td><td>${calls[i].toLocaleString()}</td><td>${puts[i].toLocaleString()}</td><td>${pcr[i].toFixed(2)}</td>;
+        tr.innerHTML = `<td>${i + 1}</td><td>${labels[i]}</td><td>—</td><td>${calls[i].toLocaleString()}</td><td>${puts[i].toLocaleString()}</td><td>${pcr[i].toFixed(2)}</td>`;
         tbody.appendChild(tr);
       }
     }
 
-    // Buttons
     document.getElementById('btn50').addEventListener('click', () => { currentCount = 50; setActiveBtn('btn50'); updateChart(currentCount); });
     document.getElementById('btn30').addEventListener('click', () => { currentCount = 30; setActiveBtn('btn30'); updateChart(currentCount); });
     document.getElementById('btn10').addEventListener('click', () => { currentCount = 10; setActiveBtn('btn10'); updateChart(currentCount); });
 
-    function setActiveBtn(id) { ['btn50', 'btn30', 'btn10'].forEach(b => document.getElementById(b).classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function setActiveBtn(id) {
+      ['btn50', 'btn30', 'btn10'].forEach(b => document.getElementById(b).classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
 
-    // View mode change
     document.getElementById('viewMode').addEventListener('change', (e) => {
       const mode = e.target.value;
       pcrChart.destroy();
@@ -260,9 +262,7 @@
       });
     });
 
-    // Init
     updateChart(currentCount);
-
   </script>
 </body>
 
