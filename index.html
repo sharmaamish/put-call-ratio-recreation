@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NIFTY Put-Call Ratio — Demo (dummy data)</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Simple Google font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --muted:#8b98a7;
+      --accent:#06b6d4;
+      --glass: rgba(255,255,255,0.03);
+      color-scheme: dark;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#061024 0%, #07162a 100%);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+    .container{max-width:1100px;margin:28px auto;padding:20px;}
+    header{display:flex;gap:18px;align-items:center;margin-bottom:18px}
+    .ticker {background:var(--card);padding:14px 18px;border-radius:12px;box-shadow:0 4px 20px rgba(2,6,23,0.6);display:flex;flex-direction:column;}
+    .ticker .symbol{font-size:18px;font-weight:600;color:#e6eef6}
+    .ticker .price{font-size:28px;font-weight:700;margin-top:6px}
+    .ticker .change{font-size:13px;color:var(--muted);margin-top:6px}
+    .search {margin-left:auto;background:var(--card);padding:10px 12px;border-radius:12px;display:flex;align-items:center;gap:8px}
+    .search input{background:transparent;border:0;color:#dfe9f2;outline:none;font-size:14px}
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:18px}
+    .card{background:var(--card);padding:16px;border-radius:14px;box-shadow:0 8px 30px rgba(2,6,23,0.5);}
+    .kpi-row{display:flex;gap:12px;flex-wrap:wrap}
+    .kpi{flex:1;min-width:150px;background:var(--glass);padding:12px;border-radius:10px}
+    .kpi .label{font-size:12px;color:var(--muted)}
+    .kpi .value{font-weight:700;font-size:18px;margin-top:6px}
+
+    /* table */
+    table{width:100%;border-collapse:collapse;color:#dbeefc}
+    thead th{font-size:12px;text-align:left;padding:8px 10px;color:var(--muted);border-bottom:1px solid rgba(255,255,255,0.04)}
+    tbody td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px}
+    .positive{color:#8ee4b9}
+    .negative{color:#ffb3aa}
+    .muted{color:var(--muted)}
+    .controls{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+    .btn{background:#071728;color:#cfeff6;padding:8px 10px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+    .small{font-size:13px;padding:6px 8px}
+
+    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+    @media (max-width:980px){ .grid{grid-template-columns:1fr; } .search{margin-left:0} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="ticker">
+        <div class="symbol">NIFTY 50</div>
+        <div class="price" id="indexPrice">25,182.30</div>
+        <div class="change" id="indexChange">-45.05 (-0.18%) • Updated: <span id="updatedAt">2025-10-14 04:00 IST</span></div>
+      </div>
+
+      <div class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="#9fcbd6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="#9fcbd6" stroke-width="1.5"/></svg>
+        <input id="searchBox" placeholder="Search stock or index (dummy)" />
+      </div>
+    </header>
+
+    <section class="grid">
+      <main class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <h2 style="margin:0;color:#eaf6fb">Put-Call Ratio (PCR)</h2>
+          <div class="muted small">PCR (Calls/ Puts) visualized with dummy data</div>
+        </div>
+
+        <div class="kpi-row" style="margin-bottom:12px">
+          <div class="kpi">
+            <div class="label">PCR (Latest)</div>
+            <div class="value" id="pcrLatest">0.94</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Total Call OI</div>
+            <div class="value" id="callOi">9,456,300</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Total Put OI</div>
+            <div class="value" id="putOi">10,043,800</div>
+          </div>
+          <div class="kpi">
+            <div class="label">PCR (30d avg)</div>
+            <div class="value" id="pcrAvg">0.97</div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div style="height:320px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:12px;border-radius:10px">
+          <canvas id="pcrChart" style="height:100%"></canvas>
+        </div>
+
+        <!-- small description -->
+        <p style="color:var(--muted);font-size:13px;margin-top:12px">
+          PCR = Put Open Interest / Call Open Interest (here shown as time-series of daily PCR). Values are dummy and for demo only.
+        </p>
+      </main>
+
+      <aside class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <strong style="font-size:15px">Options Snapshot (dummy)</strong>
+          <div class="muted small">Expiry: 2025-10-30</div>
+        </div>
+
+        <div class="controls">
+          <button class="btn small" id="sortOiBtn">Sort by OI</button>
+          <button class="btn small" id="filterHighPCR">Highlight PCR > 1</button>
+          <button class="btn small" id="resetBtn">Reset</button>
+        </div>
+
+        <div style="max-height:420px;overflow:auto;border-radius:8px;padding-right:6px">
+          <table id="dataTable">
+            <thead>
+              <tr>
+                <th>Strike</th>
+                <th>Call OI</th>
+                <th>Put OI</th>
+                <th>PCR</th>
+                <th>Volume (C/P)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- injected rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:12px;color:var(--muted);font-size:13px">
+          Data: dummy sample of top strikes by OI. Modify <code>tableData</code> array in JS to change values.
+        </div>
+      </aside>
+    </section>
+
+    <footer>
+      Demo page recreating Put-Call Ratio functionality with embedded dummy data. Not the original site's source.
+    </footer>
+  </div>
+
+  <script>
+    /* -------------------------
+       Dummy data arrays (edit to your needs)
+       ------------------------- */
+
+    // Timeseries for the chart: last 30 days
+    const chartDates = (() => {
+      const out = [];
+      const now = new Date();
+      for (let i=29;i>=0;i--){
+        const d = new Date(now);
+        d.setDate(now.getDate()-i);
+        out.push(d.toISOString().slice(0,10));
+      }
+      return out;
+    })();
+
+    // Dummy PCR time series (30 values)
+    const pcrSeries = [
+      0.92,0.95,0.98,1.03,1.00,0.99,0.96,0.94,0.92,0.90,
+      0.91,0.93,0.95,0.97,0.99,1.02,1.05,1.03,0.99,0.98,
+      0.96,0.95,0.94,0.93,0.92,0.94,0.96,0.98,0.95,0.94
+    ];
+
+    // Dummy Call and Put OI totals per day (used for area stacking)
+    const callSeries = [
+      9200000,9250000,9300000,9400000,9350000,9380000,9400000,9450000,9480000,9520000,
+      9500000,9490000,9510000,9530000,9550000,9570000,9600000,9595000,9580000,9570000,
+      9560000,9555000,9550000,9540000,9530000,9540000,9550000,9560000,9570000,9456300
+    ];
+    const putSeries = callSeries.map((c,i) => Math.round(c * pcrSeries[i])); // ensures PCR matches roughly
+
+    // Table: top strikes with call OI and put OI (dummy)
+    const tableData = [
+      {strike: 25000, callOI: 1200000, putOI: 1800000},
+      {strike: 25100, callOI: 1150000, putOI: 1700000},
+      {strike: 25200, callOI: 980000, putOI: 1000000},
+      {strike: 25300, callOI: 820000, putOI: 700000},
+      {strike: 25400, callOI: 600000, putOI: 500000},
+      {strike: 25500, callOI: 420000, putOI: 450000},
+      {strike: 25600, callOI: 300000, putOI: 360000},
+      {strike: 25700, callOI: 210000, putOI: 275000},
+      {strike: 25800, callOI: 160000, putOI: 185000},
+      {strike: 25900, callOI: 120000, putOI: 115000},
+      // add more rows if you like
+    ];
+
+    /* -------------------------
+       Utility & initial renders
+       ------------------------- */
+
+    function numberWithCommas(x){
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // compute latest PCR and totals
+    const latestPcr = (pcrSeries[pcrSeries.length-1]).toFixed(2);
+    const totalCallOi = callSeries[callSeries.length-1];
+    const totalPutOi = putSeries[putSeries.length-1];
+
+    document.getElementById('pcrLatest').textContent = latestPcr;
+    document.getElementById('callOi').textContent = numberWithCommas(totalCallOi);
+    document.getElementById('putOi').textContent = numberWithCommas(totalPutOi);
+
+    // index price is dummy here; you can change values below
+    document.getElementById('indexPrice').textContent = numberWithCommas(25182.3);
+    document.getElementById('indexChange').textContent = '-45.05 (-0.18%) • Updated: ' + (new Date()).toLocaleString();
+
+    /* -------------------------
+       Chart.js setup (PCR + OI stacked)
+       ------------------------- */
+
+    const ctx = document.getElementById('pcrChart').getContext('2d');
+
+    // gradient for call and put areas
+    function createGradient(ctx, colorStart, colorEnd){
+      const g = ctx.createLinearGradient(0,0,0,300);
+      g.addColorStop(0, colorStart);
+      g.addColorStop(1, colorEnd);
+      return g;
+    }
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartDates,
+        datasets: [
+          {
+            type: 'bar',
+            label: 'Call OI (k)',
+            data: callSeries.map(v=>Math.round(v/1000)),
+            yAxisID: 'y1',
+            borderRadius: 3,
+            barThickness: 8,
+            backgroundColor: createGradient(ctx, 'rgba(6,182,212,0.18)', 'rgba(6,182,212,0.02)'),
+            order: 1
+          },
+          {
+            type: 'bar',
+            label: 'Put OI (k)',
+            data: putSeries.map(v=>Math.round(v/1000)),
+            yAxisID: 'y1',
+            borderRadius: 3,
+            barThickness: 8,
+            backgroundColor: createGradient(ctx, 'rgba(144,224,174,0.18)', 'rgba(144,224,174,0.02)'),
+            order: 1
+          },
+          {
+            type: 'line',
+            label: 'PCR (right)',
+            data: pcrSeries,
+            yAxisID: 'y2',
+            tension: 0.22,
+            borderWidth: 2.5,
+            pointRadius: 3.5,
+            pointHoverRadius: 6,
+            backgroundColor: 'transparent',
+            borderColor: '#ffd166',
+            order: 2,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        interaction: {mode:'index', intersect:false},
+        plugins: {
+          legend: {labels:{color:'#cfeff6'}},
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                if (ctx.dataset.type === 'line') return 'PCR: ' + ctx.formattedValue;
+                return ctx.dataset.label + ': ' + ctx.formattedValue + 'k';
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks:{color:'#cfeff6'}, grid:{display:false}},
+          y1: {
+            position: 'left',
+            ticks:{color:'#cfeff6',callback:v=>v+'k'},
+            grid:{display:false}
+          },
+          y2: {
+            position: 'right',
+            ticks:{color:'#ffd166'},
+            grid:{display:false},
+            suggestedMin: 0.7,
+            suggestedMax: 1.2
+          }
+        },
+        maintainAspectRatio: false
+      }
+    });
+
+    /* -------------------------
+       Table render & interactions
+       ------------------------- */
+
+    const tbody = document.querySelector('#dataTable tbody');
+
+    function renderTable(rows){
+      tbody.innerHTML = '';
+      for (const r of rows){
+        const pcr = (r.putOI / r.callOI).toFixed(2);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight:600">${r.strike}</td>
+          <td>${numberWithCommas(r.callOI)}</td>
+          <td>${numberWithCommas(r.putOI)}</td>
+          <td class="${pcr>1 ? 'positive' : 'muted'}">${pcr}</td>
+          <td class="muted">${Math.round((r.callOI+r.putOI)/1000)}k</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    // initial render
+    renderTable(tableData);
+
+    // sort by total OI descending
+    document.getElementById('sortOiBtn').addEventListener('click', () => {
+      const copy = tableData.slice().sort((a,b) => (b.callOI+b.putOI) - (a.callOI+a.putOI));
+      renderTable(copy);
+    });
+
+    // highlight rows where PCR > 1: simply reorder so those on top and mark style
+    document.getElementById('filterHighPCR').addEventListener('click', () => {
+      const high = tableData.filter(r => r.putOI/r.callOI > 1);
+      const low  = tableData.filter(r => r.putOI/r.callOI <= 1);
+      const combined = high.concat(low);
+      renderTable(combined);
+      // visually highlight top high ones by applying a background for the first N rows
+      // small inline visual tweak:
+      const trs = tbody.querySelectorAll('tr');
+      for (let i=0;i<trs.length;i++){
+        if (i < high.length) trs[i].style.background = 'linear-gradient(90deg, rgba(144,224,174,0.06), transparent)';
+        else trs[i].style.background = 'transparent';
+      }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      renderTable(tableData);
+      // reset chart range back to default
+      chart.options.scales.y2.suggestedMin = undefined;
+      chart.options.scales.y2.suggestedMax = undefined;
+      chart.update();
+    });
+
+    // quick search demo: filters table rows by strike prefix
+    document.getElementById('searchBox').addEventListener('input', (e) => {
+      const v = (e.target.value || '').trim();
+      if (!v) { renderTable(tableData); return; }
+      const filtered = tableData.filter(r => String(r.strike).includes(v) || String(r.callOI).includes(v) || String(r.putOI).includes(v));
+      renderTable(filtered);
+    });
+
+    /* -------------------------
+       Fin
+       ------------------------- */
+  </script>
+</body>
+</html>
