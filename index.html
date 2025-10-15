@@ -1,551 +1,269 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NIFTY Put-Call Ratio — Demo (dummy data)</title>
 
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NIFTY Put-Call Ratio — Recreated (Responsive)</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-  <!-- Simple Google font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-<style>
-  :root {
-    --bg: #0f1724;
-    --card: #0b1220;
-    --muted: #8b98a7;
-    --accent: #06b6d4;
-    --glass: rgba(255, 255, 255, 0.03);
-    color-scheme: dark;
-  }
-
-  html, body {
-    height: 100%;
-    margin: 0;
-    background: linear-gradient(180deg, #061024 0%, #07162a 100%);
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-  }
-
-  .container {
-    max-width: 1100px;
-    margin: 28px auto;
-    padding: 20px;
-  }
-
-  header {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
-    margin-bottom: 18px;
-  }
-
-  .ticker {
-    background: var(--card);
-    padding: 14px 18px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(2, 6, 23, 0.6);
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-width: 150px;
-  }
-
-  .ticker .symbol {
-    font-size: 18px;
-    font-weight: 600;
-    color: #e6eef6;
-  }
-
-  .ticker .price {
-    font-size: 28px;
-    font-weight: 700;
-    margin-top: 6px;
-  }
-
-  .ticker .change {
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 6px;
-  }
-
-  .search {
-    background: var(--card);
-    padding: 10px 12px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    max-width: 300px;
-  }
-
-  .search input {
-    background: transparent;
-    border: 0;
-    color: #dfe9f2;
-    outline: none;
-    font-size: 14px;
-    width: 100%;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 420px;
-    gap: 18px;
-  }
-
-  .card {
-    background: var(--card);
-    padding: 16px;
-    border-radius: 14px;
-    box-shadow: 0 8px 30px rgba(2, 6, 23, 0.5);
-  }
-
-  .kpi-row {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .kpi {
-    flex: 1;
-    min-width: 150px;
-    background: var(--glass);
-    padding: 12px;
-    border-radius: 10px;
-  }
-
-  .kpi .label {
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .kpi .value {
-    font-weight: 700;
-    font-size: 18px;
-    margin-top: 6px;
-  }
-
-  /* table */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    color: #dbeefc;
-  }
-
-  thead th {
-    font-size: 12px;
-    text-align: left;
-    padding: 8px 10px;
-    color: var(--muted);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  }
-
-  tbody td {
-    padding: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    font-size: 13px;
-  }
-
-  .positive {
-    color: #8ee4b9;
-  }
-
-  .negative {
-    color: #ffb3aa;
-  }
-
-  .muted {
-    color: var(--muted);
-  }
-
-  .controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-  }
-
-  .btn {
-    background: #071728;
-    color: #cfeff6;
-    padding: 8px 10px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-  }
-
-  .small {
-    font-size: 13px;
-    padding: 6px 8px;
-  }
-
-  footer {
-    margin-top: 18px;
-    color: var(--muted);
-    font-size: 13px;
-    text-align: center;
-  }
-
-  /* Responsive Styles */
-  @media (max-width: 980px) {
-    .grid {
-      grid-template-columns: 1fr;
-    }
-
-    .search {
-      margin-left: 0;
-      width: 100%;
-    }
-
-    header {
-      flex-direction: column;
-      align-items: stretch;
-    }
-  }
-
-  @media (max-width: 600px) {
-    .ticker .price {
-      font-size: 22px;
-    }
-
-    .kpi .value {
-      font-size: 16px;
+  <style>
+    body {
+      background: #f8f9fa;
     }
 
     .card {
-      padding: 12px;
+      border-radius: 12px;
     }
 
-    table {
-      font-size: 12px;
+    .small-muted {
+      font-size: 0.85rem;
+      color: #6c757d;
     }
 
-    .btn {
-      font-size: 12px;
-      padding: 6px 8px;
+    /* Make table horizontally scrollable on small screens */
+    .table-responsive-sm {
+      overflow-x: auto;
     }
-  }
-</style>
-
+  </style>
 </head>
+
 <body>
-  <div class="container">
-    <header>
-      <div class="ticker">
-        <div class="symbol">NIFTY 50</div>
-        <div class="price" id="indexPrice">25,182.30</div>
-        <div class="change" id="indexChange">-45.05 (-0.18%) • Updated: <span id="updatedAt">2025-10-14 04:00 IST</span></div>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">NiftyInvest • PCR (Recreation)</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <form class="d-flex ms-auto" role="search">
+          <input class="form-control me-2" type="search" placeholder="Search stock or index..." aria-label="Search">
+          <button class="btn btn-outline-light" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+  <div class="container my-4">
+    <div class="row g-3">
+      <div class="col-12 col-lg-8">
+        <div class="card shadow-sm p-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="mb-0">NIFTY — Put/Call Ratio (PCR)</h5>
+              <div class="small-muted">Index: NIFTY • Recreated responsive demo with dummy data</div>
+            </div>
+            <div class="text-end">
+              <div class="h5 mb-0" id="indexValue">25323.55</div>
+              <div class="small-muted">178.05 (0.71%)</div>
+            </div>
+          </div>
+          <hr>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <canvas id="pcrChart" width="600" height="300"></canvas>
+            </div>
+
+            <div class="col-12 d-flex gap-2 flex-wrap">
+              <div class="btn-group" role="group" aria-label="Timeframe">
+                <button class="btn btn-outline-primary active" id="btn50">50 pts</button>
+                <button class="btn btn-outline-primary" id="btn30">30 pts</button>
+                <button class="btn btn-outline-primary" id="btn10">10 pts</button>
+              </div>
+
+              <div class="ms-auto d-flex align-items-center gap-2">
+                <label class="mb-0 small-muted">View:</label>
+                <select id="viewMode" class="form-select form-select-sm w-auto">
+                  <option value="line">Line</option>
+                  <option value="bar">Bar</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="card shadow-sm p-3 mt-3">
+          <h6 class="mb-3">Put / Call Sample Table (50 rows)</h6>
+          <div class="table-responsive-sm">
+            <table class="table table-striped table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Date</th>
+                  <th>Strike</th>
+                  <th>Calls OI</th>
+                  <th>Puts OI</th>
+                  <th>PCR (Puts/Calls)</th>
+                </tr>
+              </thead>
+              <tbody id="pcrTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
 
-      <div class="search">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="#9fcbd6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="#9fcbd6" stroke-width="1.5"/></svg>
-        <input id="searchBox" placeholder="Search stock or index (dummy)" />
+      <div class="col-12 col-lg-4">
+        <div class="card shadow-sm p-3 mb-3">
+          <h6>Quick Stats</h6>
+          <ul class="list-unstyled small-muted mb-0">
+            <li>Latest PCR: <strong id="latestPCR">0.95</strong></li>
+            <li>Average (50): <strong id="avgPCR">0.92</strong></li>
+            <li>Max (50): <strong id="maxPCR">1.15</strong></li>
+            <li>Min (50): <strong id="minPCR">0.70</strong></li>
+          </ul>
+        </div>
+
+        <div class="card shadow-sm p-3 mb-3">
+          <h6>Related Pages</h6>
+          <div class="list-group list-group-flush">
+            <a href="#" class="list-group-item list-group-item-action">Option Chain</a>
+            <a href="#" class="list-group-item list-group-item-action">Max-pain</a>
+            <a href="#" class="list-group-item list-group-item-action">OI Percentile</a>
+            <a href="#" class="list-group-item list-group-item-action">Technical</a>
+          </div>
+        </div>
+
+        <div class="card shadow-sm p-3">
+          <h6>Notes</h6>
+          <p class="small-muted mb-0">This is a static recreation for demo purposes. Data below uses generated dummy
+            points to mimic PCR behavior and is not real market data.</p>
+        </div>
       </div>
-    </header>
 
-    <section class="grid">
-      <main class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-          <h2 style="margin:0;color:#eaf6fb">Put-Call Ratio (PCR)</h2>
-          <div class="muted small">PCR (Calls/ Puts) visualized with dummy data</div>
-        </div>
-
-        <div class="kpi-row" style="margin-bottom:12px">
-          <div class="kpi">
-            <div class="label">PCR (Latest)</div>
-            <div class="value" id="pcrLatest">0.94</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Total Call OI</div>
-            <div class="value" id="callOi">9,456,300</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Total Put OI</div>
-            <div class="value" id="putOi">10,043,800</div>
-          </div>
-          <div class="kpi">
-            <div class="label">PCR (30d avg)</div>
-            <div class="value" id="pcrAvg">0.97</div>
-          </div>
-        </div>
-
-        <!-- Chart -->
-        <div style="height:320px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:12px;border-radius:10px">
-          <canvas id="pcrChart" style="height:100%"></canvas>
-        </div>
-
-        <!-- small description -->
-        <p style="color:var(--muted);font-size:13px;margin-top:12px">
-          PCR = Put Open Interest / Call Open Interest (here shown as time-series of daily PCR). Values are dummy and for demo only.
-        </p>
-      </main>
-
-      <aside class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <strong style="font-size:15px">Options Snapshot (dummy)</strong>
-          <div class="muted small">Expiry: 2025-10-30</div>
-        </div>
-
-        <div class="controls">
-          <button class="btn small" id="sortOiBtn">Sort by OI</button>
-          <button class="btn small" id="filterHighPCR">Highlight PCR > 1</button>
-          <button class="btn small" id="resetBtn">Reset</button>
-        </div>
-
-        <div style="max-height:420px;overflow:auto;border-radius:8px;padding-right:6px">
-          <table id="dataTable">
-            <thead>
-              <tr>
-                <th>Strike</th>
-                <th>Call OI</th>
-                <th>Put OI</th>
-                <th>PCR</th>
-                <th>Volume (C/P)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- injected rows -->
-            </tbody>
-          </table>
-        </div>
-
-        <div style="margin-top:12px;color:var(--muted);font-size:13px">
-          Data: dummy sample of top strikes by OI. Modify <code>tableData</code> array in JS to change values.
-        </div>
-      </aside>
-    </section>
-
-    <footer>
-      Demo page recreating Put-Call Ratio functionality with embedded dummy data. Not the original site's source.
-    </footer>
-  </div>
-
+    </div>
+    <footer class="mt-4 text-center small-muted">Recreated page • Bootstrap 5 • Chart.js • Responsive layout</footer>
+  </div><!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    /* -------------------------
-       Dummy data arrays (edit to your needs)
-       ------------------------- */
-
-    // Timeseries for the chart: last 30 days
-    const chartDates = (() => {
-      const out = [];
-      const now = new Date();
-      for (let i=29;i>=0;i--){
-        const d = new Date(now);
-        d.setDate(now.getDate()-i);
-        out.push(d.toISOString().slice(0,10));
+    // Generate 50 dummy dates and PCR values
+    function generateDummyData(n = 50) {
+      const labels = [];
+      const pcr = [];
+      const calls = [];
+      const puts = [];
+      const today = new Date();
+      for (let i = n - 1; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        labels.push(d.toISOString().split('T')[0]);
+        // generate calls and puts to create a realistic PCR
+        const call = Math.round(800000 + Math.random() * 200000 * (1 + Math.sin(i / 6)));
+        const put = Math.round(call * (0.7 + Math.random() * 0.6));
+        calls.push(call);
+        puts.push(put);
+        pcr.push(Number((put / call).toFixed(2)));
       }
-      return out;
-    })();
-
-    // Dummy PCR time series (30 values)
-    const pcrSeries = [
-      0.92,0.95,0.98,1.03,1.00,0.99,0.96,0.94,0.92,0.90,
-      0.91,0.93,0.95,0.97,0.99,1.02,1.05,1.03,0.99,0.98,
-      0.96,0.95,0.94,0.93,0.92,0.94,0.96,0.98,0.95,0.94
-    ];
-
-    // Dummy Call and Put OI totals per day (used for area stacking)
-    const callSeries = [
-      9200000,9250000,9300000,9400000,9350000,9380000,9400000,9450000,9480000,9520000,
-      9500000,9490000,9510000,9530000,9550000,9570000,9600000,9595000,9580000,9570000,
-      9560000,9555000,9550000,9540000,9530000,9540000,9550000,9560000,9570000,9456300
-    ];
-    const putSeries = callSeries.map((c,i) => Math.round(c * pcrSeries[i])); // ensures PCR matches roughly
-
-    // Table: top strikes with call OI and put OI (dummy)
-    const tableData = [
-      {strike: 25000, callOI: 1200000, putOI: 1800000},
-      {strike: 25100, callOI: 1150000, putOI: 1700000},
-      {strike: 25200, callOI: 980000, putOI: 1000000},
-      {strike: 25300, callOI: 820000, putOI: 700000},
-      {strike: 25400, callOI: 600000, putOI: 500000},
-      {strike: 25500, callOI: 420000, putOI: 450000},
-      {strike: 25600, callOI: 300000, putOI: 360000},
-      {strike: 25700, callOI: 210000, putOI: 275000},
-      {strike: 25800, callOI: 160000, putOI: 185000},
-      {strike: 25900, callOI: 120000, putOI: 115000},
-      // add more rows if you like
-    ];
-
-    /* -------------------------
-       Utility & initial renders
-       ------------------------- */
-
-    function numberWithCommas(x){
-      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return { labels, pcr, calls, puts };
     }
 
-    // compute latest PCR and totals
-    const latestPcr = (pcrSeries[pcrSeries.length-1]).toFixed(2);
-    const totalCallOi = callSeries[callSeries.length-1];
-    const totalPutOi = putSeries[putSeries.length-1];
+    let fullData = generateDummyData(50);
+    let currentCount = 50;
+    let chartType = 'line';
 
-    document.getElementById('pcrLatest').textContent = latestPcr;
-    document.getElementById('callOi').textContent = numberWithCommas(totalCallOi);
-    document.getElementById('putOi').textContent = numberWithCommas(totalPutOi);
-
-    // index price is dummy here; you can change values below
-    document.getElementById('indexPrice').textContent = numberWithCommas(25182.3);
-    document.getElementById('indexChange').textContent = '-45.05 (-0.18%) • Updated: ' + (new Date()).toLocaleString();
-
-    /* -------------------------
-       Chart.js setup (PCR + OI stacked)
-       ------------------------- */
-
+    // Create chart
     const ctx = document.getElementById('pcrChart').getContext('2d');
-
-    // gradient for call and put areas
-    function createGradient(ctx, colorStart, colorEnd){
-      const g = ctx.createLinearGradient(0,0,0,300);
-      g.addColorStop(0, colorStart);
-      g.addColorStop(1, colorEnd);
-      return g;
-    }
-
-    const chart = new Chart(ctx, {
-      type: 'line',
+    let pcrChart = new Chart(ctx, {
+      type: chartType,
       data: {
-        labels: chartDates,
-        datasets: [
-          {
-            type: 'bar',
-            label: 'Call OI (k)',
-            data: callSeries.map(v=>Math.round(v/1000)),
-            yAxisID: 'y1',
-            borderRadius: 3,
-            barThickness: 8,
-            backgroundColor: createGradient(ctx, 'rgba(6,182,212,0.18)', 'rgba(6,182,212,0.02)'),
-            order: 1
-          },
-          {
-            type: 'bar',
-            label: 'Put OI (k)',
-            data: putSeries.map(v=>Math.round(v/1000)),
-            yAxisID: 'y1',
-            borderRadius: 3,
-            barThickness: 8,
-            backgroundColor: createGradient(ctx, 'rgba(144,224,174,0.18)', 'rgba(144,224,174,0.02)'),
-            order: 1
-          },
-          {
-            type: 'line',
-            label: 'PCR (right)',
-            data: pcrSeries,
-            yAxisID: 'y2',
-            tension: 0.22,
-            borderWidth: 2.5,
-            pointRadius: 3.5,
-            pointHoverRadius: 6,
-            backgroundColor: 'transparent',
-            borderColor: '#ffd166',
-            order: 2,
-            fill: false
-          }
-        ]
+        labels: fullData.labels.slice(-currentCount),
+        datasets: [{
+          label: 'PCR (Puts / Calls)',
+          data: fullData.pcr.slice(-currentCount),
+          tension: 0.3,
+          borderWidth: 2,
+          pointRadius: 3,
+          backgroundColor: 'rgba(13,110,253,0.08)',
+          borderColor: 'rgba(13,110,253,1)'
+        }]
       },
       options: {
-        interaction: {mode:'index', intersect:false},
-        plugins: {
-          legend: {labels:{color:'#cfeff6'}},
-          tooltip: {
-            callbacks: {
-              label: function(ctx) {
-                if (ctx.dataset.type === 'line') return 'PCR: ' + ctx.formattedValue;
-                return ctx.dataset.label + ': ' + ctx.formattedValue + 'k';
-              }
-            }
-          }
-        },
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
-          x: { ticks:{color:'#cfeff6'}, grid:{display:false}},
-          y1: {
-            position: 'left',
-            ticks:{color:'#cfeff6',callback:v=>v+'k'},
-            grid:{display:false}
-          },
-          y2: {
-            position: 'right',
-            ticks:{color:'#ffd166'},
-            grid:{display:false},
-            suggestedMin: 0.7,
-            suggestedMax: 1.2
-          }
+          y: { beginAtZero: true }
         },
-        maintainAspectRatio: false
+        plugins: {
+          tooltip: { mode: 'index', intersect: false }
+        }
       }
     });
 
-    /* -------------------------
-       Table render & interactions
-       ------------------------- */
+    function updateChart(count) {
+      const labels = fullData.labels.slice(-count);
+      const data = fullData.pcr.slice(-count);
+      pcrChart.data.labels = labels;
+      pcrChart.data.datasets[0].data = data;
+      pcrChart.update();
+      updateTable(count);
+      updateStats(data);
+    }
 
-    const tbody = document.querySelector('#dataTable tbody');
+    function updateStats(arr) {
+      const latest = arr[arr.length - 1] ?? 0;
+      const avg = (arr.reduce((a, b) => a + b, 0) / arr.length) || 0;
+      const max = Math.max(...arr);
+      const min = Math.min(...arr);
+      document.getElementById('latestPCR').innerText = latest.toFixed(2);
+      document.getElementById('avgPCR').innerText = avg.toFixed(2);
+      document.getElementById('maxPCR').innerText = max.toFixed(2);
+      document.getElementById('minPCR').innerText = min.toFixed(2);
+    }
 
-    function renderTable(rows){
+    function updateTable(count) {
+      const tbody = document.getElementById('pcrTableBody');
       tbody.innerHTML = '';
-      for (const r of rows){
-        const pcr = (r.putOI / r.callOI).toFixed(2);
+      const labels = fullData.labels.slice(-count);
+      const calls = fullData.calls.slice(-count);
+      const puts = fullData.puts.slice(-count);
+      const pcr = fullData.pcr.slice(-count);
+      for (let i = 0; i < labels.length; i++) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="font-weight:600">${r.strike}</td>
-          <td>${numberWithCommas(r.callOI)}</td>
-          <td>${numberWithCommas(r.putOI)}</td>
-          <td class="${pcr>1 ? 'positive' : 'muted'}">${pcr}</td>
-          <td class="muted">${Math.round((r.callOI+r.putOI)/1000)}k</td>
-        `;
+        tr.innerHTML = <td>${i+1}</td><td>${labels[i]}</td><td>—</td><td>${calls[i].toLocaleString()}</td><td>${puts[i].toLocaleString()}</td><td>${pcr[i].toFixed(2)}</td>;
         tbody.appendChild(tr);
       }
     }
 
-    // initial render
-    renderTable(tableData);
+    // Buttons
+    document.getElementById('btn50').addEventListener('click', () => { currentCount = 50; setActiveBtn('btn50'); updateChart(currentCount); });
+    document.getElementById('btn30').addEventListener('click', () => { currentCount = 30; setActiveBtn('btn30'); updateChart(currentCount); });
+    document.getElementById('btn10').addEventListener('click', () => { currentCount = 10; setActiveBtn('btn10'); updateChart(currentCount); });
 
-    // sort by total OI descending
-    document.getElementById('sortOiBtn').addEventListener('click', () => {
-      const copy = tableData.slice().sort((a,b) => (b.callOI+b.putOI) - (a.callOI+a.putOI));
-      renderTable(copy);
+    function setActiveBtn(id) { ['btn50', 'btn30', 'btn10'].forEach(b => document.getElementById(b).classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+    // View mode change
+    document.getElementById('viewMode').addEventListener('change', (e) => {
+      const mode = e.target.value;
+      pcrChart.destroy();
+      pcrChart = new Chart(ctx, {
+        type: mode,
+        data: {
+          labels: fullData.labels.slice(-currentCount),
+          datasets: [{
+            label: 'PCR (Puts / Calls)',
+            data: fullData.pcr.slice(-currentCount),
+            borderWidth: 2,
+            backgroundColor: 'rgba(13,110,253,0.12)',
+            borderColor: 'rgba(13,110,253,1)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { y: { beginAtZero: true } },
+          plugins: { tooltip: { mode: 'index', intersect: false } }
+        }
+      });
     });
 
-    // highlight rows where PCR > 1: simply reorder so those on top and mark style
-    document.getElementById('filterHighPCR').addEventListener('click', () => {
-      const high = tableData.filter(r => r.putOI/r.callOI > 1);
-      const low  = tableData.filter(r => r.putOI/r.callOI <= 1);
-      const combined = high.concat(low);
-      renderTable(combined);
-      // visually highlight top high ones by applying a background for the first N rows
-      // small inline visual tweak:
-      const trs = tbody.querySelectorAll('tr');
-      for (let i=0;i<trs.length;i++){
-        if (i < high.length) trs[i].style.background = 'linear-gradient(90deg, rgba(144,224,174,0.06), transparent)';
-        else trs[i].style.background = 'transparent';
-      }
-    });
+    // Init
+    updateChart(currentCount);
 
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      renderTable(tableData);
-      // reset chart range back to default
-      chart.options.scales.y2.suggestedMin = undefined;
-      chart.options.scales.y2.suggestedMax = undefined;
-      chart.update();
-    });
-
-    // quick search demo: filters table rows by strike prefix
-    document.getElementById('searchBox').addEventListener('input', (e) => {
-      const v = (e.target.value || '').trim();
-      if (!v) { renderTable(tableData); return; }
-      const filtered = tableData.filter(r => String(r.strike).includes(v) || String(r.callOI).includes(v) || String(r.putOI).includes(v));
-      renderTable(filtered);
-    });
-
-    /* -------------------------
-       Fin
-       ------------------------- */
   </script>
 </body>
+
 </html>
