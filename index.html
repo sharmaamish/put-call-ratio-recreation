@@ -1,269 +1,171 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NIFTY Put-Call Ratio — Recreated (Responsive)</title>
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <style>
-    body {
-      background: #f8f9fa;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Watch Dashboard</title>
 
-    .card {
-      border-radius: 12px;
-    }
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    .small-muted {
-      font-size: 0.85rem;
-      color: #6c757d;
-    }
+<!-- Tabulator -->
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+<script src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
 
-    .table-responsive-sm {
-      overflow-x: auto;
-    }
+<style>
+  body {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #fff;
+    font-family: "Poppins", sans-serif;
+    padding: 35px 15px;
+    transition: 0.4s;
+  }
 
-    #pcrChart {
-      max-height: 400px;
-    }
-  </style>
+  .dashboard-title {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 700;
+    color: #38b6ff;
+    margin-bottom: 25px;
+  }
+
+  .table-card {
+    background: rgba(255,255,255,0.08);
+    border-radius: 14px;
+    backdrop-filter: blur(10px);
+    padding: 18px;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 0 25px rgba(0,0,0,0.25);
+  }
+
+  /* Tabulator Custom Theme */
+  .tabulator-header {
+    background: #38b6ff !important;
+    color: #000 !important;
+    font-weight: 600;
+  }
+
+  .tabulator-row {
+    transition: 0.25s;
+  }
+  .tabulator-row:hover {
+    background: rgba(56,182,255,0.2) !important;
+    transform: scale(1.01);
+  }
+
+  /* Change Colors */
+  .pos { color: #12ff65; font-weight: 600; }
+  .neg { color: #ff4b4b; font-weight: 600; }
+
+  /* Percent Bubble */
+  .bubble {
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .bubble-pos { background: rgba(18,255,101,0.25); color: #12ff65; }
+  .bubble-neg { background: rgba(255,75,75,0.25); color: #ff4b4b; }
+
+  /* Search Box */
+  .search-box input {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    border-radius: 8px;
+    padding: 10px;
+    width: 100%;
+  }
+  .search-box input::placeholder { color: #ddd; }
+
+  /* Dark Mode Toggle */
+  #toggleMode {
+    cursor: pointer;
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #38b6ff;
+    border: none;
+    font-weight: 600;
+    float: right;
+  }
+</style>
 </head>
-
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">NiftyInvest • PCR (Recreation)</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navMenu">
-        <form class="d-flex ms-auto" role="search">
-          <input class="form-control me-2" type="search" placeholder="Search stock or index..." aria-label="Search">
-          <button class="btn btn-outline-light" type="submit">Search</button>
-        </form>
-      </div>
-    </div>
-  </nav>
 
-  <div class="container my-4">
-    <div class="row g-3">
-      <div class="col-12 col-lg-8">
-        <div class="card shadow-sm p-3">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <h5 class="mb-0">NIFTY — Put/Call Ratio (PCR)</h5>
-              <div class="small-muted">Index: NIFTY • Recreated responsive demo with dummy data</div>
-            </div>
-            <div class="text-end">
-              <div class="h5 mb-0" id="indexValue">25323.55</div>
-              <div class="small-muted">178.05 (0.71%)</div>
-            </div>
-          </div>
-          <hr>
+<h2 class="dashboard-title">📊 Live Market Watch</h2>
 
-          <div class="row g-3">
-            <div class="col-12">
-              <canvas id="pcrChart"></canvas>
-            </div>
+<div class="container table-card">
 
-            <div class="col-12 d-flex gap-2 flex-wrap">
-              <div class="btn-group" role="group" aria-label="Timeframe">
-                <button class="btn btn-outline-primary active" id="btn50">50 pts</button>
-                <button class="btn btn-outline-primary" id="btn30">30 pts</button>
-                <button class="btn btn-outline-primary" id="btn10">10 pts</button>
-              </div>
+  <button id="toggleMode">Toggle Dark / Light</button>
 
-              <div class="ms-auto d-flex align-items-center gap-2">
-                <label class="mb-0 small-muted">View:</label>
-                <select id="viewMode" class="form-select form-select-sm w-auto">
-                  <option value="line">Line</option>
-                  <option value="bar">Bar</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="card shadow-sm p-3 mt-3">
-          <h6 class="mb-3">Put / Call Sample Table (50 rows)</h6>
-          <div class="table-responsive-sm">
-            <table class="table table-striped table-hover align-middle">
-              <thead class="table-light">
-                <tr>
-                  <th>#</th>
-                  <th>Date</th>
-                  <th>Strike</th>
-                  <th>Calls OI</th>
-                  <th>Puts OI</th>
-                  <th>PCR (Puts/Calls)</th>
-                </tr>
-              </thead>
-              <tbody id="pcrTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-lg-4">
-        <div class="card shadow-sm p-3 mb-3">
-          <h6>Quick Stats</h6>
-          <ul class="list-unstyled small-muted mb-0">
-            <li>Latest PCR: <strong id="latestPCR">0.95</strong></li>
-            <li>Average (50): <strong id="avgPCR">0.92</strong></li>
-            <li>Max (50): <strong id="maxPCR">1.15</strong></li>
-            <li>Min (50): <strong id="minPCR">0.70</strong></li>
-          </ul>
-        </div>
-
-        <div class="card shadow-sm p-3 mb-3">
-          <h6>Related Pages</h6>
-          <div class="list-group list-group-flush">
-            <a href="#" class="list-group-item list-group-item-action">Option Chain</a>
-            <a href="#" class="list-group-item list-group-item-action">Max-pain</a>
-            <a href="#" class="list-group-item list-group-item-action">OI Percentile</a>
-            <a href="#" class="list-group-item list-group-item-action">Technical</a>
-          </div>
-        </div>
-
-        <div class="card shadow-sm p-3">
-          <h6>Notes</h6>
-          <p class="small-muted mb-0">This is a static recreation for demo purposes. Data below uses generated dummy
-            points to mimic PCR behavior and is not real market data.</p>
-        </div>
-      </div>
-    </div>
-
-    <footer class="mt-4 text-center small-muted">Recreated page • Bootstrap 5 • Chart.js • Responsive layout</footer>
+  <div class="search-box my-3">
+    <input type="text" id="searchInput" placeholder="Search by Symbol or Company Name...">
   </div>
 
-  <!-- Bootstrap Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    function generateDummyData(n = 50) {
-      const labels = [];
-      const pcr = [];
-      const calls = [];
-      const puts = [];
-      const today = new Date();
-      for (let i = n - 1; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(today.getDate() - i);
-        labels.push(d.toISOString().split('T')[0]);
-        const call = Math.round(800000 + Math.random() * 200000 * (1 + Math.sin(i / 6)));
-        const put = Math.round(call * (0.7 + Math.random() * 0.6));
-        calls.push(call);
-        puts.push(put);
-        pcr.push(Number((put / call).toFixed(2)));
+  <div id="stock-table"></div>
+</div>
+
+<script>
+const stockData = [
+  {"symbol":"SBIN","name":"State Bank of India","ltp":735.25,"change":5.30,"percentChange":0.73,"dayHigh":742.00,"dayLow":728.10},
+  {"symbol":"RELIANCE","name":"Reliance Industries Ltd","ltp":2538.40,"change":-12.60,"percentChange":-0.49,"dayHigh":2562.75,"dayLow":2521.30},
+  {"symbol":"TCS","name":"Tata Consultancy Services Ltd","ltp":3872.10,"change":28.90,"percentChange":0.75,"dayHigh":3890.00,"dayLow":3835.50},
+  {"symbol":"INFY","name":"Infosys Ltd","ltp":1534.80,"change":-6.10,"percentChange":-0.40,"dayHigh":1552.20,"dayLow":1528.00},
+  {"symbol":"HDFC","name":"HDFC Bank Ltd","ltp":1652.55,"change":9.75,"percentChange":0.59,"dayHigh":1665.00,"dayLow":1641.00}
+];
+
+const table = new Tabulator("#stock-table", {
+  data: stockData,
+  layout: "fitColumns",
+  pagination: "local",
+  paginationSize: 6,
+  columns: [
+    { title:"Symbol", field:"symbol", width:100, headerSort:true },
+    { title:"Company Name", field:"name", minWidth:160 },
+    { title:"LTP (₹)", field:"ltp", hozAlign:"right" },
+    {
+      title:"Change",
+      field:"change",
+      formatter: cell => {
+        let v = cell.getValue();
+        return <span class="${v>=0?"pos":"neg"}">${v>=0?"▲":"▼"} ${v}</span>;
       }
-      return { labels, pcr, calls, puts };
-    }
-
-    let fullData = generateDummyData(50);
-    let currentCount = 50;
-    let chartType = 'line';
-
-    const ctx = document.getElementById('pcrChart').getContext('2d');
-    let pcrChart = new Chart(ctx, {
-      type: chartType,
-      data: {
-        labels: fullData.labels.slice(-currentCount),
-        datasets: [{
-          label: 'PCR (Puts / Calls)',
-          data: fullData.pcr.slice(-currentCount),
-          tension: 0.3,
-          borderWidth: 2,
-          pointRadius: 3,
-          backgroundColor: 'rgba(13,110,253,0.08)',
-          borderColor: 'rgba(13,110,253,1)'
-        }]
+    },
+    {
+      title:"% Change",
+      field:"percentChange",
+      formatter: cell => {
+        let v = cell.getValue();
+        return <span class="bubble ${v>=0?"bubble-pos":"bubble-neg"}">${v}%</span>;
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { beginAtZero: true }
-        },
-        plugins: {
-          tooltip: { mode: 'index', intersect: false }
-        }
-      }
-    });
+      hozAlign:"center"
+    },
+    { title:"High", field:"dayHigh", hozAlign:"right" },
+    { title:"Low", field:"dayLow", hozAlign:"right" }
+  ]
+});
 
-    function updateChart(count) {
-      const labels = fullData.labels.slice(-count);
-      const data = fullData.pcr.slice(-count);
-      pcrChart.data.labels = labels;
-      pcrChart.data.datasets[0].data = data;
-      pcrChart.update();
-      updateTable(count);
-      updateStats(data);
-    }
+// Search Filter
+document.getElementById("searchInput").addEventListener("keyup", function(){
+  let val = this.value.toLowerCase();
+  table.setFilter(function(row) {
+    return row.symbol.toLowerCase().includes(val) || row.name.toLowerCase().includes(val);
+  });
+});
 
-    function updateStats(arr) {
-      const latest = arr[arr.length - 1] ?? 0;
-      const avg = (arr.reduce((a, b) => a + b, 0) / arr.length) || 0;
-      const max = Math.max(...arr);
-      const min = Math.min(...arr);
-      document.getElementById('latestPCR').innerText = latest.toFixed(2);
-      document.getElementById('avgPCR').innerText = avg.toFixed(2);
-      document.getElementById('maxPCR').innerText = max.toFixed(2);
-      document.getElementById('minPCR').innerText = min.toFixed(2);
-    }
+// Dark / Light Toggle
+document.getElementById("toggleMode").onclick = () => {
+  document.body.classList.toggle("light");
+  if(document.body.classList.contains("light")){
+    document.body.style.background = "#f4f6f9";
+    document.body.style.color = "#000";
+  } else {
+    document.body.style.background = "linear-gradient(135deg, #0f172a, #1e293b)";
+    document.body.style.color = "#fff";
+  }
+};
+</script>
 
-    function updateTable(count) {
-      const tbody = document.getElementById('pcrTableBody');
-      tbody.innerHTML = '';
-      const labels = fullData.labels.slice(-count);
-      const calls = fullData.calls.slice(-count);
-      const puts = fullData.puts.slice(-count);
-      const pcr = fullData.pcr.slice(-count);
-      for (let i = 0; i < labels.length; i++) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${i + 1}</td><td>${labels[i]}</td><td>—</td><td>${calls[i].toLocaleString()}</td><td>${puts[i].toLocaleString()}</td><td>${pcr[i].toFixed(2)}</td>`;
-        tbody.appendChild(tr);
-      }
-    }
-
-    document.getElementById('btn50').addEventListener('click', () => { currentCount = 50; setActiveBtn('btn50'); updateChart(currentCount); });
-    document.getElementById('btn30').addEventListener('click', () => { currentCount = 30; setActiveBtn('btn30'); updateChart(currentCount); });
-    document.getElementById('btn10').addEventListener('click', () => { currentCount = 10; setActiveBtn('btn10'); updateChart(currentCount); });
-
-    function setActiveBtn(id) {
-      ['btn50', 'btn30', 'btn10'].forEach(b => document.getElementById(b).classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
-
-    document.getElementById('viewMode').addEventListener('change', (e) => {
-      const mode = e.target.value;
-      pcrChart.destroy();
-      pcrChart = new Chart(ctx, {
-        type: mode,
-        data: {
-          labels: fullData.labels.slice(-currentCount),
-          datasets: [{
-            label: 'PCR (Puts / Calls)',
-            data: fullData.pcr.slice(-currentCount),
-            borderWidth: 2,
-            backgroundColor: 'rgba(13,110,253,0.12)',
-            borderColor: 'rgba(13,110,253,1)'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: { y: { beginAtZero: true } },
-          plugins: { tooltip: { mode: 'index', intersect: false } }
-        }
-      });
-    });
-
-    updateChart(currentCount);
-  </script>
 </body>
-
 </html>
